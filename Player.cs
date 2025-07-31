@@ -20,22 +20,25 @@ public class player : MonoBehaviour
     bool wDown;
     bool jDown;
     bool iDown;
+    bool fDown;
     bool sDown1;
     bool sDown2;
     bool sDown3;
     bool dDown;
-
+    
     bool isJump;
     bool isDodge;
     bool isSwap;
+    bool isFireReady;
     Vector3 moveVec;
     Rigidbody rigid;
     Animator anim;
 
     GameObject nearObject;
-    GameObject equipWeapon;
+    // GameObject equipWeapon;
+    Weapon equipWeapon;
     int equipWeaponIndex = -1; // 현재 장착된 무기 인덱스
-
+    float fireDelay;
     [SerializeField]
     float maxSlopeAngle = 45f;
     [SerializeField]
@@ -57,6 +60,7 @@ public class player : MonoBehaviour
         Move();
         Turn();
         Jump();
+        Attack();
         Dodge();
         Swap();
         Interact();
@@ -70,6 +74,7 @@ public class player : MonoBehaviour
         vAxis = Input.GetAxisRaw("Vertical");
         wDown = Input.GetButton("Walk");
         jDown = Input.GetButtonDown("Jump");
+        fDown = Input.GetButtonDown("Fire1");
         iDown = Input.GetButtonDown("Interact");
         sDown1 = Input.GetButtonDown("Swap1");
         sDown2 = Input.GetButtonDown("Swap2");
@@ -189,6 +194,46 @@ public class player : MonoBehaviour
             */
         
     }
+
+    void Attack()
+    {
+        if (equipWeapon == null)
+        {
+            return; // 무기가 장착되어 있지 않으면 공격 불가
+        }
+
+        fireDelay += Time.deltaTime; // 공격 후 재사용 대기 시간 증가
+        isFireReady = equipWeapon.rate < fireDelay; // 공격 가능 여부 판단
+
+        if (fDown && isFireReady && !isDodge && !isSwap)
+        {
+            // Debug.Log("Attack with " + equipWeapon.name);
+            // 무기 사용
+            equipWeapon.Use();
+            anim.SetTrigger("doSwing");
+            //isFireReady = false; // 공격 후 재사용 대기 시간 설정
+            fireDelay = 0; // 공격 속도에 따라 재사용 대기 시간 설정
+        }
+        // else if (Time.time >= fireDelay)
+        // {
+        //     isFireReady = true; // 재사용 대기 시간 경과 시 공격 가능
+        // }
+       
+       
+
+        // if (fDown && equipWeapon != null && !isJump && !isDodge && !isSwap)
+        // {
+        //     // Debug.Log("Attack with " + equipWeapon.name);
+        //     // 무기 사용
+        //     equipWeapon.Use();
+        //     isFireReady = false; // 공격 후 재사용 대기 시간 설정
+        //     fireDelay = Time.time + equipWeapon.rate; // 공격 속도에 따라 재사용 대기 시간 설정
+        // }
+        // else if (Time.time >= fireDelay)
+        // {
+        //     isFireReady = true; // 재사용 대기 시간 경과 시 공격 가능
+        // }
+    }   
     void Dodge()
     {
         // if (jDown && !isJump)
@@ -260,14 +305,17 @@ public class player : MonoBehaviour
             // 무기 교체
             if (equipWeapon != null)
             {
-                equipWeapon.SetActive(false);
+                equipWeapon.gameObject.SetActive(false);
             }
             // weapons[weaponIndex].SetActive(true);
             // Debug.Log("Swap to weapon " + (weaponIndex + 1));
             // equipWeaponIndex = weaponIndex; // 현재 장착된 무기 인덱스 업데이트
-            equipWeapon = weapons[weaponIndex];
 
-            equipWeapon.SetActive(true);
+            // equipWeapon = weapons[weaponIndex];
+            equipWeapon = weapons[weaponIndex].GetComponent<Weapon>();
+
+            // equipWeapon.SetActive(true);
+            equipWeapon.gameObject.SetActive(true);
 
             anim.SetTrigger("doSwap");
             isSwap = true;

@@ -74,12 +74,12 @@ public class player : MonoBehaviour
         vAxis = Input.GetAxisRaw("Vertical");
         wDown = Input.GetButton("Walk");
         jDown = Input.GetButtonDown("Jump");
-        fDown = Input.GetButtonDown("Fire1");
+        fDown = Input.GetButton("Fire1");
         iDown = Input.GetButtonDown("Interact");
         sDown1 = Input.GetButtonDown("Swap1");
         sDown2 = Input.GetButtonDown("Swap2");
         sDown3 = Input.GetButtonDown("Swap3");
-        dDown = Input.GetButtonDown("Dodge");
+        dDown = Input.GetButton("Dodge");
     }
     void Move()
     {
@@ -210,16 +210,18 @@ public class player : MonoBehaviour
             // Debug.Log("Attack with " + equipWeapon.name);
             // 무기 사용
             equipWeapon.Use();
-            anim.SetTrigger("doSwing");
+            anim.SetTrigger(equipWeapon.type == Weapon.Type.Melee ? "doSwing" : "doShot");
             //isFireReady = false; // 공격 후 재사용 대기 시간 설정
             fireDelay = 0; // 공격 속도에 따라 재사용 대기 시간 설정
         }
+        
+
         // else if (Time.time >= fireDelay)
         // {
         //     isFireReady = true; // 재사용 대기 시간 경과 시 공격 가능
         // }
-       
-       
+
+
 
         // if (fDown && equipWeapon != null && !isJump && !isDodge && !isSwap)
         // {
